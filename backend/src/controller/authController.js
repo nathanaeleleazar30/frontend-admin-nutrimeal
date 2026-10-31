@@ -74,6 +74,13 @@ const authController = {
               phone: customer.phone,
               address: customer.address,
               avatar_url: customer.avatar_url || null,
+              height_cm: customer.height_cm,
+              weight_kg: customer.weight_kg,
+              age: customer.age,
+              allergies: customer.allergies,
+              dietary_goals: customer.dietary_goals,
+              target_calories: customer.target_calories,
+              two_factor_auth: customer.two_factor_auth,
               total_orders: customer.total_orders,
               total_spent: customer.total_spent,
               active_subscription: customer.active_subscription,
@@ -244,6 +251,13 @@ const authController = {
             phone: customer.phone,
             address: customer.address,
             avatar_url: customer.avatar_url || verifiedAvatar || null,
+            height_cm: customer.height_cm,
+            weight_kg: customer.weight_kg,
+            age: customer.age,
+            allergies: customer.allergies,
+            dietary_goals: customer.dietary_goals,
+            target_calories: customer.target_calories,
+            two_factor_auth: customer.two_factor_auth,
             total_orders: customer.total_orders,
             total_spent: customer.total_spent,
             active_subscription: customer.active_subscription,
@@ -259,14 +273,17 @@ const authController = {
   // GET /api/auth/customer-me (Cek Sesi Customer Mobile)
   async getCustomerMe(req, res, next) {
     try {
-      const authHeader = req.headers.authorization;
+      const authHeader = req.headers.authorization || '';
       const customerId = req.query.id;
+      const email = req.query.email;
 
       let customer = null;
       if (customerId) {
         customer = await customerModel.getById(customerId);
+      } else if (email) {
+        customer = await customerModel.findByEmail(email);
       } else if (authHeader) {
-        const match = authHeader.match(/token_customer_(cst-[0-9]+)/);
+        const match = authHeader.match(/token_customer_([^\s_]+)/) || authHeader.match(/(cst-[^\s_]+)/);
         if (match && match[1]) {
           customer = await customerModel.getById(match[1]);
         }
